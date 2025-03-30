@@ -6,8 +6,9 @@ from utils import (dataframe_to_custom_html, custom_css,
 from streamlit_autorefresh import st_autorefresh
 
 # --- Configuration ---
-SHEET_NAME = "Stream datasheet" # <--- CHANGE THIS
-WORKSHEET_NAME = "Race2_M-Elite_kisatulos"       # <--- CHANGE THIS
+# SHEET_NAME = "Stream datasheet" # No longer used
+SHEET_ID = "1rQ6LqJym84EiY29SzP8n5mcRdaz10AGrvfvJ66wPtPc" # <-- The ID from your Sheet URL
+WORKSHEET_NAME = "Overall_M-40_Time"   # <-- Make sure this is the correct Masters tab!
 REFRESH_INTERVAL_MS = 30000  # Refresh every 30 seconds
 # ---------------------
 
@@ -24,7 +25,7 @@ st.markdown("## Masters - Top 5")
 client = connect_gsheet()
 
 # 2. Load Data (uses caching with ttl=60s defined in utils.py)
-df_masters = load_data_from_gsheet(client, SHEET_NAME, WORKSHEET_NAME)
+df_masters = load_data_from_gsheet(client, SHEET_ID, WORKSHEET_NAME)
 
 # 3. Displaying the Panel
 col1, col2, col3 = st.columns([1, 4, 1])

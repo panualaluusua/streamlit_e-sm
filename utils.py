@@ -104,10 +104,10 @@ def connect_gsheet():
         st.error(f"Failed to connect to Google Sheets: {e}")
         return None
 
-# Function to load data from a specific sheet and worksheet
+# Function to load data from a specific sheet and worksheet using Sheet ID
 # Cache the data itself with a shorter TTL for updates
 @st.cache_data(ttl=60) # Cache data for 60 seconds
-def load_data_from_gsheet(_client, sheet_name, worksheet_name):
+def load_data_from_gsheet(_client, sheet_id, worksheet_name):
     if _client is None:
         st.error("Google Sheets client not available. Cannot load data.")
         # Return a dummy DataFrame to prevent downstream errors
@@ -115,8 +115,10 @@ def load_data_from_gsheet(_client, sheet_name, worksheet_name):
             'Rank': [1], 'Name1': ['Error'], 'Name2': ['Loading Data'], 'Time': [str(time.time())]
         })
     try:
-        st.info(f"Fetching data from {sheet_name} / {worksheet_name}...") # User feedback
-        spreadsheet = _client.open(sheet_name)
+        st.info(f"Fetching data from sheet ID: ...{sheet_id[-10:]} / Worksheet: {worksheet_name}...") # User feedback
+        # --- Open using Sheet ID instead of Name ---
+        spreadsheet = _client.open_by_key(sheet_id)
+        # --------------------------------------------
         worksheet = spreadsheet.worksheet(worksheet_name)
         # Get all values, assuming first row is header
         data = worksheet.get_all_records()
@@ -135,10 +137,11 @@ def load_data_from_gsheet(_client, sheet_name, worksheet_name):
         st.success(f"Data loaded successfully from {worksheet_name}!") # User feedback
         return df
 
-    except gspread.exceptions.SpreadsheetNotFound:
-        st.error(f"Error: Google Sheet '{sheet_name}' not found. Check spelling and sharing permissions.")
+    except gspread.exceptions.APIError as e:
+        # More specific error for permission issues / sheet not found by ID
+        st.error(f"Google API Error: Could not access Sheet ID ...{sheet_id[-10:]}. Check sharing permissions for the service account and ensure the Sheet ID is correct. Details: {e}")
     except gspread.exceptions.WorksheetNotFound:
-        st.error(f"Error: Worksheet '{worksheet_name}' not found in sheet '{sheet_name}'.")
+        st.error(f"Error: Worksheet '{worksheet_name}' not found in sheet ID ...{sheet_id[-10:]}.")
     except Exception as e:
         st.error(f"Failed to load data from {worksheet_name}: {e}")
 
