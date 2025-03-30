@@ -7,7 +7,7 @@ from streamlit_autorefresh import st_autorefresh
 
 # --- Configuration ---
 SHEET_NAME = "Stream datasheet" # <--- CHANGE THIS
-WORKSHEET_NAME = "Overall_M-40_Time"        # <--- CHANGE THIS
+WORKSHEET_NAME = "Race2_M-Elite_kisatulos"        # <--- CHANGE THIS
 REFRESH_INTERVAL_MS = 30000  # Refresh every 30 seconds
 # ---------------------
 

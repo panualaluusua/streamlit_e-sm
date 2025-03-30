@@ -6,8 +6,8 @@ from utils import (dataframe_to_custom_html, custom_css,
 from streamlit_autorefresh import st_autorefresh
 
 # --- Configuration ---
-SHEET_NAME = "Race1_M-Elite_kisatulos" # <--- CHANGE THIS
-WORKSHEET_NAME = "Race1_M-40_kisatulos"       # <--- CHANGE THIS
+SHEET_NAME = "Stream datasheet" # <--- CHANGE THIS
+WORKSHEET_NAME = "Race2_M-Elite_kisatulos"       # <--- CHANGE THIS
 REFRESH_INTERVAL_MS = 30000  # Refresh every 30 seconds
 # ---------------------
 
