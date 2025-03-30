@@ -1,4 +1,8 @@
+import streamlit as st
 import pandas as pd
+import gspread
+from google.oauth2.service_account import Credentials
+import time # Needed for caching demo if API fails
 
 # Custom CSS definition
 custom_css = """
@@ -79,10 +83,79 @@ custom_css = """
 </style>
 """
 
+# --- Google Sheets Integration --- 
+
+# Define scope
+SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive.file'
+]
+
+# Function to load credentials and authorize gspread
+# Cache the gspread client authorization for efficiency
+@st.cache_resource(ttl=3600) # Cache the connection for an hour
+def connect_gsheet():
+    try:
+        creds_dict = st.secrets["google_sheets_credentials"]
+        creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+        client = gspread.authorize(creds)
+        return client
+    except Exception as e:
+        st.error(f"Failed to connect to Google Sheets: {e}")
+        return None
+
+# Function to load data from a specific sheet and worksheet
+# Cache the data itself with a shorter TTL for updates
+@st.cache_data(ttl=60) # Cache data for 60 seconds
+def load_data_from_gsheet(_client, sheet_name, worksheet_name):
+    if _client is None:
+        st.error("Google Sheets client not available. Cannot load data.")
+        # Return a dummy DataFrame to prevent downstream errors
+        return pd.DataFrame({
+            'Rank': [1], 'Name1': ['Error'], 'Name2': ['Loading Data'], 'Time': [str(time.time())]
+        })
+    try:
+        st.info(f"Fetching data from {sheet_name} / {worksheet_name}...") # User feedback
+        spreadsheet = _client.open(sheet_name)
+        worksheet = spreadsheet.worksheet(worksheet_name)
+        # Get all values, assuming first row is header
+        data = worksheet.get_all_records()
+        df = pd.DataFrame(data)
+        # Basic validation: Check if expected columns are roughly there
+        if df.shape[1] < 4:
+             st.warning(f"Warning: Loaded data from {worksheet_name} has fewer than 4 columns.")
+             # Pad with empty columns if needed to avoid breaking table generation
+             while df.shape[1] < 4:
+                 df[f'EmptyCol_{df.shape[1]+1}'] = ''
+        elif df.empty:
+             st.warning(f"Warning: Worksheet {worksheet_name} appears to be empty.")
+             # Return specific structure if empty
+             return pd.DataFrame(columns=['Rank', 'Name1', 'Name2', 'Time'])
+
+        st.success(f"Data loaded successfully from {worksheet_name}!") # User feedback
+        return df
+
+    except gspread.exceptions.SpreadsheetNotFound:
+        st.error(f"Error: Google Sheet '{sheet_name}' not found. Check spelling and sharing permissions.")
+    except gspread.exceptions.WorksheetNotFound:
+        st.error(f"Error: Worksheet '{worksheet_name}' not found in sheet '{sheet_name}'.")
+    except Exception as e:
+        st.error(f"Failed to load data from {worksheet_name}: {e}")
+
+    # Return a dummy DataFrame on error
+    return pd.DataFrame({
+        'Rank': [1], 'Name1': ['Error'], 'Name2': ['Loading Data'], 'Time': [str(time.time())]
+    })
+
+# --- End Google Sheets Integration ---
+
 # Function to generate custom HTML Table
 def dataframe_to_custom_html(df):
+    if df.empty or df.shape[1] < 4:
+        return "<p>No data available or data format incorrect.</p>"
+
     html = '<table class="custom-table">'
-    # Ensure column names match exactly what's expected
+    # Dynamically get column names from the DataFrame
     rank_col = df.columns[0]
     name1_col = df.columns[1]
     name2_col = df.columns[2]

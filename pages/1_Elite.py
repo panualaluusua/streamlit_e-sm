@@ -1,36 +1,51 @@
 import streamlit as st
 import pandas as pd
-from utils import dataframe_to_custom_html, custom_css
+# Import necessary functions and autorefresh
+from utils import (dataframe_to_custom_html, custom_css,
+                     connect_gsheet, load_data_from_gsheet)
+from streamlit_autorefresh import st_autorefresh
+
+# --- Configuration ---
+SHEET_NAME = "Stream datasheet" # <--- CHANGE THIS
+WORKSHEET_NAME = "Race1_M-Elite_kisatulos"         # <--- CHANGE THIS
+REFRESH_INTERVAL_MS = 30000  # Refresh every 30 seconds
+# ---------------------
 
 # Apply the shared CSS - Must be done on each page
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# --- Elite Page Specifics ---
+# Auto-refresh the page
+count = st_autorefresh(interval=REFRESH_INTERVAL_MS, limit=None, key="elite_refresher")
 
+# --- Elite Page Specifics ---
 st.markdown("## Elite - Top 5")
 
-# 1. Data Preparation (Placeholder for Elite)
-#    Replace with your actual data loading logic for Elite
-elite_data = {
-    'Rank': [1, 2, 3, 4, 5],
-    'Name1': ['Elite One', 'Elite Two', 'Elite Three', 'Elite Four', 'Elite Five'],
-    'Name2': ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-    'Time': ['00:25:01.123', '+02:34', '+05:67', '+08:90', '+10:11']
-}
-df_elite = pd.DataFrame(elite_data)
+# 1. Connect to Google Sheets
+client = connect_gsheet()
 
-# 2. Displaying the Panel
-#    Using columns to center the panel somewhat
-col1, col2, col3 = st.columns([1,4,1])
+# 2. Load Data (uses caching with ttl=60s defined in utils.py)
+df_elite = load_data_from_gsheet(client, SHEET_NAME, WORKSHEET_NAME)
+
+# 3. Displaying the Panel
+col1, col2, col3 = st.columns([1, 4, 1])
 
 with col2:
     st.markdown('<div class="data-panel">', unsafe_allow_html=True)
     st.markdown('<div class="panel-title">Miehet Elite TOP 5</div>', unsafe_allow_html=True)
 
-    # Use the utility function to generate and display the table
-    html_table = dataframe_to_custom_html(df_elite)
-    st.markdown(html_table, unsafe_allow_html=True)
+    # Check if DataFrame is not None and not empty before displaying
+    if df_elite is not None and not df_elite.empty:
+        # Use the utility function to generate and display the table
+        html_table = dataframe_to_custom_html(df_elite)
+        st.markdown(html_table, unsafe_allow_html=True)
+    elif df_elite is not None: # Handle case where sheet might be empty but loads correctly
+        st.markdown("<p>No data currently available in the sheet.</p>", unsafe_allow_html=True)
+    else: # Handle case where loading failed (error shown by load_data_from_gsheet)
+        st.markdown("<p>Could not load data.</p>", unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
+
+# Display refresh count for debugging/visibility (optional)
+# st.write(f"Page refreshed {count} times")
 
 # You could potentially add more panels or charts specific to the Elite category here 
