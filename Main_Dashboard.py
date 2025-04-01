@@ -144,10 +144,10 @@ with col2: # Content in the center column
         # Use the utility function to generate and display the table
         html_table = dataframe_to_custom_html(df_results)
         st.markdown(html_table, unsafe_allow_html=True)
-    elif df_results is not None: # Handle case where sheet might be empty but loads correctly
-        st.markdown(f"<p>No data currently available for {WORKSHEET_NAME}.</p>", unsafe_allow_html=True)
-    else: # Handle case where loading failed (error shown by load_data_from_gsheet)
-        st.markdown(f"<p>Could not load data for {WORKSHEET_NAME}.</p>", unsafe_allow_html=True)
+    # Change the message for empty or failed load conditions
+    else: # Covers both None (load failed) and empty DataFrame cases
+        # New cycling-themed message in Finnish
+        st.markdown(f"<p>Pyöräilijät lämmittelevät, tulokset tulossa pian!</p>", unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
 

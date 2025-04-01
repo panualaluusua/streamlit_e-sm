@@ -152,15 +152,16 @@ def load_data_from_gsheet(_client, sheet_id, worksheet_name):
         data = worksheet.get_all_records()
         df = pd.DataFrame(data)
         # Basic validation: Check if expected columns are roughly there
-        if df.shape[1] < 4:
-             st.warning(f"Warning: Loaded data from {worksheet_name} has fewer than 4 columns.")
+        if df.shape[1] < 5:
+             # st.warning(f"Warning: Loaded data from {worksheet_name} has fewer than 5 columns.") # COMMENTED OUT
              # Pad with empty columns if needed to avoid breaking table generation
-             while df.shape[1] < 4:
+             # This padding might not even be necessary if dataframe_to_custom_html handles it
+             while df.shape[1] < 5:
                  df[f'EmptyCol_{df.shape[1]+1}'] = ''
         elif df.empty:
-             st.warning(f"Warning: Worksheet {worksheet_name} appears to be empty.")
+             # st.warning(f"Warning: Worksheet {worksheet_name} appears to be empty.") # COMMENTED OUT
              # Return specific structure if empty
-             return pd.DataFrame(columns=['Rank', 'Name1', 'Name2', 'Time'])
+             return pd.DataFrame(columns=['Rank', 'Name1', 'Name2', 'Team', 'Time']) # Use actual expected headers
 
         # st.success(f"Data loaded successfully from {worksheet_name}!") # User feedback - COMMENTED OUT
         return df
