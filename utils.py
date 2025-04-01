@@ -184,13 +184,15 @@ def dataframe_to_custom_html(df):
     rank_col = df.columns[0]
     name1_col = df.columns[1]
     name2_col = df.columns[2]
-    time_col = df.columns[3]
+    team_col = df.columns[3]
+    time_col = df.columns[4]
 
     for index, row in df.iterrows():
         html += '<tr>'
         html += f'<td class="rank-col">{row[rank_col]}</td>'
         html += f'<td class="name1-col">{row[name1_col]}</td>'
         html += f'<td class="name2-col">{row[name2_col]}</td>'
+        html += f'<td class="team_col">{row[team_col]}</td>'
         html += f'<td class="time-col">{row[time_col]}</td>'
         html += '</tr>'
     html += '</table>'
