@@ -6,7 +6,7 @@ from utils import (dataframe_to_custom_html, custom_css,
 from streamlit_autorefresh import st_autorefresh
 
 # --- Configuration ---
-# SHEET_NAME = "Stream datasheet" # No longer used
+#SHEET_NAME = "Stream datasheet" # No longer used
 SHEET_ID = "1rQ6LqJym84EiY29SzP8n5mcRdaz10AGrvfvJ66wPtPc" # <-- The ID from your Sheet URL
 WORKSHEET_NAME = "OA_M19"           # <-- Make sure this is the correct Juniors tab!
 REFRESH_INTERVAL_MS = 30000  # Refresh every 30 seconds
@@ -19,7 +19,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 count = st_autorefresh(interval=REFRESH_INTERVAL_MS, limit=None, key="juniors_refresher")
 
 # --- Juniors Page Specifics ---
-st.markdown("## Juniors - Top 5")
+st.markdown("## Juniors_Overall - Top 5")
 
 # 1. Connect to Google Sheets
 client = connect_gsheet()

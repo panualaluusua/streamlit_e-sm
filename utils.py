@@ -96,12 +96,34 @@ SCOPES = [
 @st.cache_resource(ttl=3600) # Cache the connection for an hour
 def connect_gsheet():
     try:
-        creds_dict = st.secrets["google_sheets_credentials"]
+        # Try different possible locations for the credentials in st.secrets
+        if "google_sheets_credentials" in st.secrets:
+            # Found at top level
+            creds_dict = st.secrets["google_sheets_credentials"]
+        elif "type" in st.secrets and st.secrets["type"] == "service_account":
+            # Credentials are at top level (not nested)
+            creds_dict = st.secrets
+        else:
+            # Print available keys for debugging
+            available_keys = list(st.secrets.keys())
+            st.error(f"Could not find Google Sheets credentials in secrets. Available keys: {available_keys}")
+            # If 'utils' is one of the keys (which seems likely from the error), try that path
+            if "utils" in available_keys and "google_sheets_credentials" in st.secrets["utils"]:
+                creds_dict = st.secrets["utils"]["google_sheets_credentials"]
+            else:
+                raise KeyError("Could not find a valid path to Google service account credentials in st.secrets")
+        
+        # Debug info (optional) - remove in production if secrets show up in logs
+        # st.write(f"Found credential keys: {list(creds_dict.keys())}")
+        
         creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
         client = gspread.authorize(creds)
         return client
     except Exception as e:
-        st.error(f"Failed to connect to Google Sheets: {e}")
+        st.error(f"Failed to connect to Google Sheets: {str(e)}")
+        # More detailed error to help debug
+        import traceback
+        st.error(f"Details: {traceback.format_exc()}")
         return None
 
 # Function to load data from a specific sheet and worksheet using Sheet ID
