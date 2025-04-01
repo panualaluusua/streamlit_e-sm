@@ -8,7 +8,7 @@ from streamlit_autorefresh import st_autorefresh
 # --- Configuration ---
 # SHEET_NAME = "Stream datasheet" # No longer used
 SHEET_ID = "1rQ6LqJym84EiY29SzP8n5mcRdaz10AGrvfvJ66wPtPc" # <-- The ID from your Sheet URL
-WORKSHEET_NAME = "Race2_M-Elite_kisatulos" # <-- Make sure this is the correct Elite tab!
+WORKSHEET_NAME = "OA_MElite" # <-- Make sure this is the correct Elite tab!
 REFRESH_INTERVAL_MS = 30000  # Refresh every 30 seconds
 # ---------------------
 

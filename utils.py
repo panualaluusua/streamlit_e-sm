@@ -3,6 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 import time # Needed for caching demo if API fails
+import streamlit.components.v1 as components # Import components
 
 # Custom CSS definition
 custom_css = """
@@ -197,3 +198,113 @@ def dataframe_to_custom_html(df):
         html += '</tr>'
     html += '</table>'
     return html 
+
+def display_leaderboard(title: str, results: list[tuple]):
+    """
+    Displays a leaderboard with custom styling using HTML and CSS.
+
+    Args:
+        title (str): The title to display above the leaderboard.
+        results (list[tuple]): A list of tuples, where each tuple represents a row.
+                               Expected format: (rank, name, team, time)
+    """
+    # CSS for styling
+    css = """
+<style>
+.leaderboard-container {
+    background-color: #1c3d5a; /* Dark blue background */
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: sans-serif; /* Basic sans-serif font */
+    margin-bottom: 1em; /* Add some space below the leaderboard */
+}
+.leaderboard-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: left;
+}
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.leaderboard-table td {
+    padding: 8px 5px;
+    vertical-align: middle;
+    border-top: 1px solid #3a5a7a; /* Lighter blue line between rows */
+}
+.leaderboard-table tr:first-child td {
+    border-top: none; /* No line above the first row */
+}
+.rank-col {
+    width: 5%;
+    text-align: left;
+    font-weight: bold;
+}
+.name-col {
+    width: 40%;
+    text-align: left;
+}
+.team-col {
+    width: 30%;
+    text-align: left;
+}
+.time-col {
+    width: 25%;
+    text-align: right;
+    font-family: monospace; /* Monospace font for time */
+}
+</style>
+"""
+
+    # HTML structure
+    html = f"""
+<div class="leaderboard-container">
+  <div class="leaderboard-title">{title}</div>
+  <table class="leaderboard-table">
+    <tbody>
+"""
+
+    # Add rows dynamically
+    for row_data in results:
+        # Basic validation to prevent errors if row is too short
+        if len(row_data) == 4:
+            # Explicitly cast data to string before formatting
+            rank = str(row_data[0])
+            name = str(row_data[1])
+            team = str(row_data[2])
+            time = str(row_data[3])
+            html += f"""
+              <tr>
+                <td class="rank-col">{rank}</td>
+                <td class="name-col">{name}</td>
+                <td class="team-col">{team}</td>
+                <td class="time-col">{time}</td>
+              </tr>
+        """
+        else:
+            # Handle potential malformed row data gracefully (e.g., log a warning or skip)
+            st.warning(f"Skipping malformed row in leaderboard data: {row_data}")
+
+
+    html += """
+    </tbody>
+  </table>
+</div>
+"""
+
+    # --- DEBUG: Print the generated HTML --- 
+    # print("--- Generated Leaderboard HTML ---")
+    # print(html)
+    # print("--- End Generated HTML ---")
+    # -------------------------------------
+
+    # Combine CSS and HTML into a single string for the component
+    full_html = css + html
+
+    # Use components.html instead of st.markdown for the table itself
+    # Estimate height: ~60px for title/padding + ~35px per row
+    component_height = 60 + (len(results) * 35)
+    # Pass the combined HTML and CSS string
+    components.html(full_html, height=component_height) 
