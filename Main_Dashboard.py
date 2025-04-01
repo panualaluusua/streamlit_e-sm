@@ -27,7 +27,8 @@ RACE_MAP = {
 }
 
 CATEGORY_MAP = {
-    "N-Elite": "NE",
+    "N-Elite": "NElite",
+    "M-Elite": "MElite",
     "M-U15": "M15",
     "N-U15": "N15",
     "M-U17": "M17",
