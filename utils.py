@@ -64,16 +64,22 @@ custom_css = """
         width: 5%; /* Adjust width as needed */
     }
     .custom-table .name1-col { /* First name column */
-        width: 30%;
+        width: 25%;
     }
     .custom-table .name2-col { /* Second name/team column */
-         width: 35%;
+        width: 25%;
     }
     .custom-table .time-col { /* Time column */
         font-weight: bold;
         text-align: right;
-        width: 30%;
+        width: 20%;
      }
+
+    /* Add styling for the new Team column */
+    .custom-table .team-col { 
+        width: 25%; /* Adjust width as needed */
+        padding-left: 10px; /* Add some space */
+    }
 
     /* Hide default Streamlit elements */
     #MainMenu {visibility: hidden;}
@@ -176,21 +182,26 @@ def load_data_from_gsheet(_client, sheet_id, worksheet_name):
 
 # Function to generate custom HTML Table
 def dataframe_to_custom_html(df):
-    if df.empty or df.shape[1] < 4:
-        return "<p>No data available or data format incorrect.</p>"
+    # Check for at least 5 columns now
+    if df.empty or df.shape[1] < 5:
+        return "<p>No data available or data format incorrect (needs 5 columns: Rank, Name1, Name2, Team, Time).</p>"
 
     html = '<table class="custom-table">'
-    # Dynamically get column names from the DataFrame
-    rank_col = df.columns[0]
-    name1_col = df.columns[1]
-    name2_col = df.columns[2]
-    time_col = df.columns[3]
+    # Get column names based on the confirmed order
+    rank_col = df.columns[0]  # Sijoitus
+    name1_col = df.columns[1] # Etunimi
+    name2_col = df.columns[2] # Sukunimi
+    team_col = df.columns[3]  # Seura
+    time_col = df.columns[4]  # Aika
 
     for index, row in df.iterrows():
         html += '<tr>'
         html += f'<td class="rank-col">{row[rank_col]}</td>'
         html += f'<td class="name1-col">{row[name1_col]}</td>'
         html += f'<td class="name2-col">{row[name2_col]}</td>'
+        # Add the Team column display
+        html += f'<td class="team-col">{row[team_col]}</td>'
+        # Time column is now the 5th element
         html += f'<td class="time-col">{row[time_col]}</td>'
         html += '</tr>'
     html += '</table>'
