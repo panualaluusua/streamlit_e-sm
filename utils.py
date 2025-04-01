@@ -137,7 +137,7 @@ def load_data_from_gsheet(_client, sheet_id, worksheet_name):
             'Rank': [1], 'Name1': ['Error'], 'Name2': ['Loading Data'], 'Time': [str(time.time())]
         })
     try:
-        st.info(f"Fetching data from sheet ID: ...{sheet_id[-10:]} / Worksheet: {worksheet_name}...") # User feedback
+        # st.info(f"Fetching data from sheet ID: ...{sheet_id[-10:]} / Worksheet: {worksheet_name}...") # User feedback - COMMENTED OUT
         # --- Open using Sheet ID instead of Name ---
         spreadsheet = _client.open_by_key(sheet_id)
         # --------------------------------------------
@@ -156,7 +156,7 @@ def load_data_from_gsheet(_client, sheet_id, worksheet_name):
              # Return specific structure if empty
              return pd.DataFrame(columns=['Rank', 'Name1', 'Name2', 'Time'])
 
-        st.success(f"Data loaded successfully from {worksheet_name}!") # User feedback
+        # st.success(f"Data loaded successfully from {worksheet_name}!") # User feedback - COMMENTED OUT
         return df
 
     except gspread.exceptions.APIError as e:
