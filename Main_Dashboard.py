@@ -18,7 +18,8 @@ st.set_page_config(
 # --- Apply Custom CSS ---
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# --- Data Mappings ---
+# --- Data Mappings (User-friendly name -> Code) ---
+# Ensure these exactly match the worksheet naming convention
 RACE_MAP = {
     "Race 1": "R1",
     "Race 2": "R2",
@@ -26,6 +27,7 @@ RACE_MAP = {
     "Overall": "OA"
 }
 
+# Corrected category map based on user's original list
 CATEGORY_MAP = {
     "N-Elite": "NElite",
     "M-Elite": "MElite",
@@ -45,41 +47,87 @@ CATEGORY_MAP = {
     "N-40": "N40",
     "N-50": "N50",
     "N-60": "N60"
+    # Add "M-Elite": "ME" if that exists in sheets, otherwise remove
 }
 
-# --- Sidebar Selections ---
+# --- Inverse Mappings (Code -> User-friendly name) ---
+INV_RACE_MAP = {v: k for k, v in RACE_MAP.items()}
+INV_CATEGORY_MAP = {v: k for k, v in CATEGORY_MAP.items()}
+
+# --- Get Codes from URL Query Params (with defaults) ---
+url_params = st.query_params.to_dict()
+default_race_code = "R1"
+default_category_code = "MElite"
+
+# Validate codes from URL, fall back to defaults if invalid
+current_race_code = url_params.get("race", default_race_code)
+if current_race_code not in INV_RACE_MAP:
+    current_race_code = default_race_code
+
+current_category_code = url_params.get("category", default_category_code)
+if current_category_code not in INV_CATEGORY_MAP:
+    current_category_code = default_category_code
+
+# --- Determine default selections for sidebar based on URL/defaults ---
+default_race_name = INV_RACE_MAP[current_race_code]
+default_category_name = INV_CATEGORY_MAP[current_category_code]
+
+race_options = list(RACE_MAP.keys())
+category_options = list(CATEGORY_MAP.keys())
+
+default_race_index = race_options.index(default_race_name)
+default_category_index = category_options.index(default_category_name)
+
+# --- Callback to update URL when sidebar selection changes ---
+def update_url_params():
+    selected_race = st.session_state.race_select # Get value from widget's key
+    selected_category = st.session_state.category_select # Get value from widget's key
+
+    race_code = RACE_MAP[selected_race]
+    category_code = CATEGORY_MAP[selected_category]
+
+    # Update query parameters - this triggers a rerun
+    st.query_params["race"] = race_code
+    st.query_params["category"] = category_code
+
+# --- Sidebar Selections (Now linked to URL) ---
 st.sidebar.title("Select Results")
 selected_race_name = st.sidebar.selectbox(
     "Select Race:",
-    options=list(RACE_MAP.keys()),
-    index=0 # Default to 'Race 1'
+    options=race_options,
+    index=default_race_index, # Set default based on URL
+    key="race_select", # Assign key for session state access
+    on_change=update_url_params # Set callback function
 )
 
 selected_category_name = st.sidebar.selectbox(
     "Select Category:",
-    options=list(CATEGORY_MAP.keys()),
-    index=0 # Default to 'N-Elite'
+    options=category_options,
+    index=default_category_index, # Set default based on URL
+    key="category_select", # Assign key for session state access
+    on_change=update_url_params # Set callback function
 )
 
-# --- Construct Worksheet Name ---
+# --- Construct Worksheet Name (based on current selections reflected by URL or sidebar change) ---
+# We use the names selected in the widgets (which reflect the URL state after rerun)
 race_prefix = RACE_MAP[selected_race_name]
 category_suffix = CATEGORY_MAP[selected_category_name]
 WORKSHEET_NAME = f"{race_prefix}_{category_suffix}"
 
 # --- Auto-Refresh ---
-# Use worksheet name in key to ensure refresh on selection change
+# Use worksheet name in key to ensure refresh timer resets on selection change
 count = st_autorefresh(interval=REFRESH_INTERVAL_MS, limit=None, key=f"refresh_{WORKSHEET_NAME}")
 
 # --- Main Panel Display ---
 
-# Create a dynamic title
+# Create a dynamic title based on current selections
 display_title = f"{selected_race_name} - {selected_category_name} Top 5"
 st.markdown(f"## {display_title}")
 
 # 1. Connect to Google Sheets
 client = connect_gsheet()
 
-# 2. Load Data based on selections
+# 2. Load Data based on selections derived from URL/callback
 df_results = load_data_from_gsheet(client, SHEET_ID, WORKSHEET_NAME)
 
 # 3. Displaying the Panel centered using columns
@@ -103,6 +151,6 @@ with col2: # Content in the center column
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Optional: Display refresh count for debugging
+# Optional: Display refresh count and sheet name for debugging
 # st.sidebar.write(f"Refresh count: {count}")
 # st.sidebar.write(f"Loading Sheet: {WORKSHEET_NAME}") 
