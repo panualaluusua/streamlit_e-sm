@@ -86,20 +86,42 @@ def update_url_params():
 
 # --- Sidebar Selections (Now linked to URL) ---
 st.sidebar.title("Select Results")
+
+# Add gender filter
+selected_gender = st.sidebar.radio(
+    "Show Categories:",
+    options=["Men's Categories", "Women's Categories"],
+    key="gender_filter"
+)
+
+# Filter categories based on gender selection
+if selected_gender == "Men's Categories":
+    filtered_categories = {k: v for k, v in CATEGORY_MAP.items() if k.startswith('M-')}
+else:  # Women's categories
+    filtered_categories = {k: v for k, v in CATEGORY_MAP.items() if k.startswith('N-')}
+
 selected_race_name = st.sidebar.selectbox(
     "Select Race:",
     options=race_options,
-    index=default_race_index, # Set default based on URL
-    key="race_select", # Assign key for session state access
-    on_change=update_url_params # Set callback function
+    index=default_race_index,
+    key="race_select",
+    on_change=update_url_params
 )
+
+# Update category selection to use filtered categories
+category_options = list(filtered_categories.keys())
+# Ensure the default category index is valid for the filtered list
+try:
+    default_category_index = category_options.index(default_category_name)
+except ValueError:
+    default_category_index = 0  # Default to first category if current selection is not in filtered list
 
 selected_category_name = st.sidebar.selectbox(
     "Select Category:",
     options=category_options,
-    index=default_category_index, # Set default based on URL
-    key="category_select", # Assign key for session state access
-    on_change=update_url_params # Set callback function
+    index=default_category_index,
+    key="category_select",
+    on_change=update_url_params
 )
 
 # --- Construct Worksheet Name (based on current selections reflected by URL or sidebar change) ---
