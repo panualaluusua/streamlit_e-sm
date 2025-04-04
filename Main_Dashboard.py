@@ -33,12 +33,7 @@ CATEGORY_MAP = {
     "M-Elite": "MElite",
     "M-U15": "M15",
     "N-U15": "N15",
-    "M-U17": "M17",
-    "N-U17": "N17",
     "M-U19": "M19",
-    "N-U19": "N19",
-    "M-U23": "M23",
-    "N-U23": "N23",
     "M-30": "M30",
     "M-40": "M40",
     "M-50": "M50",
@@ -47,7 +42,6 @@ CATEGORY_MAP = {
     "N-40": "N40",
     "N-50": "N50",
     "N-60": "N60"
-    # Add "M-Elite": "ME" if that exists in sheets, otherwise remove
 }
 
 # --- Inverse Mappings (Code -> User-friendly name) ---
@@ -121,7 +115,7 @@ count = st_autorefresh(interval=REFRESH_INTERVAL_MS, limit=None, key=f"refresh_{
 # --- Main Panel Display ---
 
 # Create a dynamic title based on current selections
-display_title = f"{selected_race_name} - {selected_category_name} Top 5"
+display_title = f"{selected_race_name} - {selected_category_name}"
 st.markdown(f"## {display_title}")
 
 # 1. Connect to Google Sheets
@@ -136,7 +130,7 @@ col1, col2, col3 = st.columns([1, 4, 1]) # Adjust ratios as needed
 with col2: # Content in the center column
     st.markdown('<div class="data-panel">', unsafe_allow_html=True)
     # Use a slightly more generic panel title or base it on selection
-    panel_title = f"{selected_category_name} ({selected_race_name}) TOP 5"
+    panel_title = f"{selected_category_name} ({selected_race_name})"
     st.markdown(f'<div class="panel-title">{panel_title}</div>', unsafe_allow_html=True)
 
     # Check if DataFrame is not None and not empty before displaying
