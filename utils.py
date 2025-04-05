@@ -64,21 +64,25 @@ custom_css = """
         width: 5%; /* Adjust width as needed */
     }
     .custom-table .name1-col { /* First name column */
-        width: 25%;
+        width: 15%;
     }
     .custom-table .name2-col { /* Second name/team column */
-        width: 25%;
+        width: 15%;
+    }
+    .custom-table .team-col { 
+        width: 15%; /* Adjust width as needed */
+        padding-left: 10px; /* Add some space */
     }
     .custom-table .time-col { /* Time column */
         font-weight: bold;
         text-align: right;
-        width: 20%;
-     }
-
-    /* Add styling for the new Team column */
-    .custom-table .team-col { 
-        width: 25%; /* Adjust width as needed */
-        padding-left: 10px; /* Add some space */
+        width: 10%;
+    }
+    .custom-table .race-time-col { /* Individual race time columns */
+        font-weight: normal;
+        text-align: right;
+        width: 10%;
+        color: #cccccc; /* Slightly dimmer than the total time */
     }
 
     /* Hide default Streamlit elements */
@@ -182,28 +186,43 @@ def load_data_from_gsheet(_client, sheet_id, worksheet_name):
 # --- End Google Sheets Integration ---
 
 # Function to generate custom HTML Table
-def dataframe_to_custom_html(df):
-    # Check for at least 5 columns now
-    if df.empty or df.shape[1] < 5:
-        return "<p>No data available or data format incorrect (needs 5 columns: Rank, Name1, Name2, Team, Time).</p>"
+def dataframe_to_custom_html(df, is_overall=False):
+    # Check for minimum columns (5 for regular view, 8 for overall view)
+    min_cols = 8 if is_overall else 5
+    if df.empty or df.shape[1] < min_cols:
+        return "<p>Pyöräilijät lämmittelevät, tulokset tulossa pian!</p>"
 
     html = '<table class="custom-table">'
+    
     # Get column names based on the confirmed order
     rank_col = df.columns[0]  # Sijoitus
     name1_col = df.columns[1] # Etunimi
     name2_col = df.columns[2] # Sukunimi
     team_col = df.columns[3]  # Seura
-    time_col = df.columns[4]  # Aika
+    time_col = df.columns[4]  # Kokonaisaika
+    
+    # Additional columns for overall view
+    race1_col = df.columns[5] if is_overall else None  # Kilpailu 1 Aika
+    race2_col = df.columns[6] if is_overall else None  # Kilpailu 2 Aika
+    race3_col = df.columns[7] if is_overall else None  # Kilpailu 3 Aika
 
     for index, row in df.iterrows():
         html += '<tr>'
         html += f'<td class="rank-col">{row[rank_col]}</td>'
         html += f'<td class="name1-col">{row[name1_col]}</td>'
         html += f'<td class="name2-col">{row[name2_col]}</td>'
-        # Add the Team column display
         html += f'<td class="team-col">{row[team_col]}</td>'
-        # Time column is now the 5th element
-        html += f'<td class="time-col">{row[time_col]}</td>'
+        
+        # For overall view, show individual race times and total
+        if is_overall:
+            html += f'<td class="time-col">{row[time_col]}</td>'  # Total time
+            html += f'<td class="race-time-col">{row[race1_col]}</td>'  # Race 1
+            html += f'<td class="race-time-col">{row[race2_col]}</td>'  # Race 2
+            html += f'<td class="race-time-col">{row[race3_col]}</td>'  # Race 3
+        else:
+            # Just show the single time column for regular races
+            html += f'<td class="time-col">{row[time_col]}</td>'
+            
         html += '</tr>'
     html += '</table>'
     return html 

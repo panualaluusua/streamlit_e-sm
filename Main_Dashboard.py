@@ -136,11 +136,11 @@ with col2: # Content in the center column
     # Check if DataFrame is not None and not empty before displaying
     if df_results is not None and not df_results.empty:
         # Use the utility function to generate and display the table
-        html_table = dataframe_to_custom_html(df_results)
+        # Check if we're viewing an Overall (OA) race
+        is_overall = race_prefix == "OA"
+        html_table = dataframe_to_custom_html(df_results, is_overall=is_overall)
         st.markdown(html_table, unsafe_allow_html=True)
-    # Change the message for empty or failed load conditions
     else: # Covers both None (load failed) and empty DataFrame cases
-        # New cycling-themed message in Finnish
         st.markdown(f"<p>Pyöräilijät lämmittelevät, tulokset tulossa pian!</p>", unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
