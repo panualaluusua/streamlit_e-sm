@@ -29,7 +29,7 @@ RACE_MAP = {
 
 # Corrected category map based on user's original list
 CATEGORY_MAP = {
-    "N-Elite": "NElite ",
+    "N-Elite": "NElite",
     "M-Elite": "MElite",
     "M-U15": "M15",
     "N-U15": "N15",
