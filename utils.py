@@ -90,6 +90,16 @@ custom_css = """
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
+    /* Unconfirmed results note styling */
+    .unconfirmed-note {
+        color: #ffcc00;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
 </style>
 """
 

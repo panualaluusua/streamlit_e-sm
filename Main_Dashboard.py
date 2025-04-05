@@ -135,6 +135,8 @@ with col2: # Content in the center column
 
     # Check if DataFrame is not None and not empty before displaying
     if df_results is not None and not df_results.empty:
+        # Add note about unconfirmed results
+        st.markdown('<div class="unconfirmed-note">Vahvistamattomat tulokset</div>', unsafe_allow_html=True)
         # Use the utility function to generate and display the table
         # Check if we're viewing an Overall (OA) race
         is_overall = race_prefix == "OA"
