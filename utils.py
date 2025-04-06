@@ -92,7 +92,7 @@ custom_css = """
 
     /* Unconfirmed results note styling */
     .unconfirmed-note {
-        color: #ffcc00;
+        color: #4CAF50;  /* Changed to a green color for confirmed status */
         font-weight: bold;
         text-align: center;
         margin-bottom: 15px;
